@@ -24,17 +24,22 @@ void setup() {
 }
 
 void loop() {
-  int buttonState = digitalRead(buttonPin);
-
-  if (buttonState == HIGH && !buttonPressed) {
-    pressStartTime = millis();
-    buttonPressed = true;
-  }
-
-  if (buttonState == LOW && buttonPressed) {
-    pressDuration = millis() - pressStartTime;
-    buttonPressed = false;
-    sendDurationToServer(pressDuration);
+  if (digitalRead(performanceModePin) == LOW) {
+    server.handleClient();
+  } else {
+    int buttonState = digitalRead(buttonPin);
+  
+    if (buttonState == HIGH && !buttonPressed) {
+      pressStartTime = millis();
+      buttonPressed = true;
+    }
+  
+    if (buttonState == LOW && buttonPressed) {
+      pressDuration = millis() - pressStartTime;
+      buttonPressed = false;
+      recordPressDuration(pressDuration);
+      sendDurationToServer(pressDuration);
+    }
   }
 }
 
@@ -59,4 +64,17 @@ void sendDurationToServer(unsigned long duration) {
     }
     http.end();
   }
+}
+
+void setLEDColor(int r, int g, int b) {
+  analogWrite(ledPin, r);
+}
+
+void setupServer() {
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP("Arduino_Performance");
+  server.on("/", handleRoot);
+  server.onNotFound(handleNotFound);
+  server.begin();
+  Serial.println("HTTP server started");
 }
