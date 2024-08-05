@@ -25,15 +25,38 @@ void setup() {
 
 void loop() {
   int buttonState = digitalRead(buttonPin);
-  
+
   if (buttonState == HIGH && !buttonPressed) {
     pressStartTime = millis();
     buttonPressed = true;
   }
-  
+
   if (buttonState == LOW && buttonPressed) {
     pressDuration = millis() - pressStartTime;
     buttonPressed = false;
     sendDurationToServer(pressDuration);
+  }
+}
+
+void sendDurationToServer(unsigned long duration) {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    String url = String(serverUrl) + "?duration=" + duration;
+    http.begin(url);
+    int httpCode = http.GET();
+    if (httpCode > 0) {
+      String payload = http.getString();
+      Serial.println(payload);
+      if (payload == "shorter") {
+        digitalWrite(ledPin, LOW); 
+        analogWrite(ledPin, 32); 
+      } else {
+        digitalWrite(ledPin, HIGH);
+        analogWrite(ledPin, 255);
+      }
+    } else {
+      Serial.println("Error in HTTP request");
+    }
+    http.end();
   }
 }
