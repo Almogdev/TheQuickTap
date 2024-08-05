@@ -5,7 +5,7 @@ const int buttonPin = D1;  // הכפתור מחובר לפין D1
 const int ledPin = D2;     // נורה מחוברת לפין D2
 const char* ssid = "your_SSID";
 const char* password = "your_PASSWORD";
-const char* serverUrl = "http://your_server.com/update";
+const char* serverUrl = "http://api.kits4.me/GEN/api.php";
 
 unsigned long pressStartTime;
 unsigned long pressDuration;
@@ -24,5 +24,16 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  int buttonState = digitalRead(buttonPin);
+  
+  if (buttonState == HIGH && !buttonPressed) {
+    pressStartTime = millis();
+    buttonPressed = true;
+  }
+  
+  if (buttonState == LOW && buttonPressed) {
+    pressDuration = millis() - pressStartTime;
+    buttonPressed = false;
+    sendDurationToServer(pressDuration);
+  }
 }
