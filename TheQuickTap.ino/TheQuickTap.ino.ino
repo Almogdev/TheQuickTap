@@ -78,3 +78,13 @@ void setupServer() {
   server.begin();
   Serial.println("HTTP server started");
 }
+
+void handleNotFound() {
+  server.send(404, "text/plain", "Not found");
+}
+
+void recordPressDuration(unsigned long duration) {
+  lastPresses[pressIndex] = duration;
+  isNewRecord[pressIndex] = false; // נדרש לבדוק אם זה שיא חדש ולהתאים
+  pressIndex = (pressIndex + 1) % 10;
+}
